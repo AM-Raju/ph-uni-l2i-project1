@@ -36,6 +36,20 @@ const academicSemesterSchema = new Schema<TAcademicSemester>(
   { timestamps: true },
 );
 
+// Create prehook middleware to check document before save
+
+academicSemesterSchema.pre('save', async function (next) {
+  const isSemesterExist = await AcademicSemesterModel.findOne({
+    name: this.name,
+    year: this.year,
+  });
+
+  if (isSemesterExist) {
+    throw new Error('Semester exists');
+  }
+  next();
+});
+
 // Creation of academicSemester model
 export const AcademicSemesterModel = model<TAcademicSemester>(
   'AcademicSemester',
