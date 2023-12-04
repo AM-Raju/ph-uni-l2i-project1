@@ -1,4 +1,4 @@
-import { Schema, SchemaType, model } from 'mongoose';
+import { Schema, model } from 'mongoose';
 import {
   StudentModel,
   TGuardian,
@@ -99,7 +99,7 @@ const studentSchema = new Schema<TStudent, StudentModel>(
       },
       required: [true, 'Gender is required'],
     },
-    dateOfBirth: { type: Date },
+    dateOfBirth: { type: String },
     email: {
       type: String,
       required: [true, 'Email is required'],
