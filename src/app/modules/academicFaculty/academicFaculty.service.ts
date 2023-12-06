@@ -12,7 +12,11 @@ const getAllAcademicFacultiesFromDB = async () => {
 };
 
 const getSingleAcademicFacultyFromDB = async (id: string) => {
+  console.log('raju id', id);
+
   const result = await AcademicFacultyModel.findById(id);
+  console.log('raju2', result);
+
   return result;
 };
 
