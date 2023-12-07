@@ -2,6 +2,14 @@ import { TAcademicDepartment } from './academicDepartment.interface';
 import { AcademicDepartmentModel } from './academicDepartment.model';
 
 const createAcademicDepartmentIntoDB = async (payload: TAcademicDepartment) => {
+  // this section is used in module 13.7
+  /* const isDepartmentExist = await AcademicDepartmentModel.findOne({
+    name: payload.name,
+  });
+
+  if (isDepartmentExist) {
+    throw new Error('This department already exists!');
+  } */
   const result = await AcademicDepartmentModel.create(payload);
   return result;
 };
