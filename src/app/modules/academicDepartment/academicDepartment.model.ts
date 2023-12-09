@@ -18,7 +18,7 @@ const academicDepartmentSchema = new Schema<TAcademicDepartment>(
   { timestamps: true },
 );
 
-// document middleware is used for creating department
+/* // document middleware is used for creating department
 academicDepartmentSchema.pre('save', async function (next) {
   const isDepartmentExist = await AcademicDepartmentModel.findOne({
     name: this.name,
@@ -28,7 +28,7 @@ academicDepartmentSchema.pre('save', async function (next) {
     throw new AppError(httpStatus.NOT_FOUND, 'Department already exist');
   }
   next();
-});
+}); */
 
 // Query middleware is used to updating department
 academicDepartmentSchema.pre('findOneAndUpdate', async function (next) {
