@@ -30,7 +30,7 @@ academicDepartmentSchema.pre('save', async function (next) {
   next();
 }); */
 
-// Query middleware is used to updating department
+/* // Query middleware is used to updating department
 academicDepartmentSchema.pre('findOneAndUpdate', async function (next) {
   const query = this.getQuery();
   const isDepartmentExist = await AcademicDepartmentModel.findOne(query);
@@ -38,7 +38,7 @@ academicDepartmentSchema.pre('findOneAndUpdate', async function (next) {
     throw new AppError(httpStatus.NOT_FOUND, 'Department not found');
   }
   next();
-});
+}); */
 
 export const AcademicDepartmentModel = model<TAcademicDepartment>(
   'AcademicDepartment',
