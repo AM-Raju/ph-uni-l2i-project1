@@ -4,22 +4,39 @@ import AppError from '../../error/AppError';
 import httpStatus from 'http-status';
 import { User } from '../user/user.model';
 import { TStudent } from './student.interface';
+import { string } from 'zod';
 
 const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
+  console.log('base query', query);
+  const queryObj = { ...query }; // make a copy of query object
+  console.log('query object', queryObj);
+
   // Searching format
   // {email: {$regex: query?.searchTerm, $options: "i"}}
   // {presentAddress: {$regex: query?.searchTerm, $options: "i"}}
   // {"name.firstName": {$regex: query?.searchTerm, $options: "i"}}
+  const studentSearchableFields = ['email', 'name.firstName', 'presentAddress'];
   let searchTerm = '';
   if (query?.searchTerm) {
     searchTerm = query?.searchTerm as string;
   }
 
-  const result = await Student.find({
-    $or: ['email', 'name.firstName', 'presentAddress'].map((field) => ({
+  // Search query
+  const searchQuery = Student.find({
+    $or: studentSearchableFields.map((field) => ({
       [field]: { $regex: searchTerm, $options: 'i' },
     })),
-  })
+  });
+
+  // filtering
+  const excludesFields = ['searchTerm', 'sort', 'limit'];
+  excludesFields.forEach((el) => delete queryObj[el]);
+
+  console.log(queryObj);
+
+  // Filter query
+  const filterQuery = searchQuery
+    .find(queryObj)
     .populate('academicSemester')
     .populate({
       path: 'academicDepartment',
@@ -27,7 +44,23 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
         path: 'academicFaculty',
       },
     });
-  return result;
+
+  // Sort query
+  let sort = '-createdAt';
+  if (query.sort) {
+    sort = query.sort as string;
+  }
+
+  const sortQuery = filterQuery.sort(sort);
+
+  let limit = 1;
+
+  if (query.limit) {
+    limit = Number(query.limit);
+  }
+
+  const limitQuery = await sortQuery.limit(limit);
+  return limitQuery;
 };
 
 const getSingleStudentFromDB = async (id: string) => {
