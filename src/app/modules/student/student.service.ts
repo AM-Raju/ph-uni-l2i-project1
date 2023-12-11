@@ -4,12 +4,9 @@ import AppError from '../../error/AppError';
 import httpStatus from 'http-status';
 import { User } from '../user/user.model';
 import { TStudent } from './student.interface';
-import { string } from 'zod';
 
 const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
-  console.log('base query', query);
   const queryObj = { ...query }; // make a copy of query object
-  console.log('query object', queryObj);
 
   // Searching format
   // {email: {$regex: query?.searchTerm, $options: "i"}}
@@ -29,10 +26,10 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
   });
 
   // filtering
-  const excludesFields = ['searchTerm', 'sort', 'limit'];
+  const excludesFields = ['searchTerm', 'sort', 'limit', 'page', 'fields'];
   excludesFields.forEach((el) => delete queryObj[el]);
 
-  console.log(queryObj);
+  console.log('Base query and after exclusion query', { query }, { queryObj });
 
   // Filter query
   const filterQuery = searchQuery
@@ -53,14 +50,38 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
 
   const sortQuery = filterQuery.sort(sort);
 
-  let limit = 1;
+  // limit query
+  // pagination started
+  let page = 1;
+  let limit = 0;
+  let skip = 0;
 
   if (query.limit) {
     limit = Number(query.limit);
   }
 
-  const limitQuery = await sortQuery.limit(limit);
-  return limitQuery;
+  if (query.page) {
+    page = Number(query.page);
+    skip = (page - 1) * limit;
+  }
+
+  const paginationQuery = sortQuery.skip(skip);
+
+  const limitQuery = paginationQuery.limit(limit);
+
+  // Field limiting
+  let fields = '-__v';
+
+  // fields: 'name,email' == what we get
+  // fields: 'name email' == what we need to convert
+
+  if (query.fields) {
+    fields = (query.fields as string).split(',').join(' ');
+  }
+
+  const fieldQuery = await limitQuery.select(fields);
+
+  return fieldQuery;
 };
 
 const getSingleStudentFromDB = async (id: string) => {
