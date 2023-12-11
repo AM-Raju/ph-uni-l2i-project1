@@ -11,12 +11,13 @@ class QueryBuilder<T> {
 
   // Search method
   search(searchableFields: string[]) {
-    if (this?.query?.searchTerm) {
+    const searchTerm = this?.query?.searchTerm;
+    if (searchTerm) {
       this.modelQuery = this.modelQuery.find({
         $or: searchableFields.map(
           (field) =>
             ({
-              [field]: { $regex: this?.qyery?.searchTerm, $options: 'i' },
+              [field]: { $regex: searchTerm, $options: 'i' },
             }) as FilterQuery<T>,
         ),
       });
@@ -25,7 +26,6 @@ class QueryBuilder<T> {
   }
 
   // Filter method
-
   filter() {
     const queryObj = { ...this.query };
 
@@ -34,4 +34,32 @@ class QueryBuilder<T> {
     this.modelQuery = this.modelQuery.find(queryObj as FilterQuery<T>);
     return this;
   }
+
+  // Sort method
+  sort() {
+    const sort = this?.query?.sort || '-createdAt';
+    this.modelQuery = this.modelQuery.sort(sort as string);
+    return this;
+  }
+
+  // Paginate method
+  paginate() {
+    const page = Number(this?.query?.page) || 1;
+    const limit = Number(this?.query?.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    this.modelQuery = this.modelQuery.skip(skip).limit(limit);
+    return this;
+  }
+
+  // Field limiting method
+  fields() {
+    const fields =
+      (this?.query?.fields as string)?.split(',')?.join(' ') || '-__v';
+
+    this.modelQuery = this.modelQuery.select(fields);
+    return this;
+  }
 }
+
+export default QueryBuilder;

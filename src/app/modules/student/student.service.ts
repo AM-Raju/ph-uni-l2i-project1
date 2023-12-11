@@ -4,84 +4,19 @@ import AppError from '../../error/AppError';
 import httpStatus from 'http-status';
 import { User } from '../user/user.model';
 import { TStudent } from './student.interface';
+import QueryBuilder from '../../builder/Querybuilder';
+import { studentSearchableFields } from './student.constant';
 
 const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
-  const queryObj = { ...query }; // make a copy of query object
+  const studentQuery = new QueryBuilder(Student.find(), query)
+    .search(studentSearchableFields)
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
 
-  // Searching format
-  // {email: {$regex: query?.searchTerm, $options: "i"}}
-  // {presentAddress: {$regex: query?.searchTerm, $options: "i"}}
-  // {"name.firstName": {$regex: query?.searchTerm, $options: "i"}}
-  const studentSearchableFields = ['email', 'name.firstName', 'presentAddress'];
-  let searchTerm = '';
-  if (query?.searchTerm) {
-    searchTerm = query?.searchTerm as string;
-  }
-
-  // Search query
-  const searchQuery = Student.find({
-    $or: studentSearchableFields.map((field) => ({
-      [field]: { $regex: searchTerm, $options: 'i' },
-    })),
-  });
-
-  // filtering
-  const excludesFields = ['searchTerm', 'sort', 'limit', 'page', 'fields'];
-  excludesFields.forEach((el) => delete queryObj[el]);
-
-  console.log('Base query and after exclusion query', { query }, { queryObj });
-
-  // Filter query
-  const filterQuery = searchQuery
-    .find(queryObj)
-    .populate('academicSemester')
-    .populate({
-      path: 'academicDepartment',
-      populate: {
-        path: 'academicFaculty',
-      },
-    });
-
-  // Sort query
-  let sort = '-createdAt';
-  if (query.sort) {
-    sort = query.sort as string;
-  }
-
-  const sortQuery = filterQuery.sort(sort);
-
-  // limit query
-  // pagination started
-  let page = 1;
-  let limit = 0;
-  let skip = 0;
-
-  if (query.limit) {
-    limit = Number(query.limit);
-  }
-
-  if (query.page) {
-    page = Number(query.page);
-    skip = (page - 1) * limit;
-  }
-
-  const paginationQuery = sortQuery.skip(skip);
-
-  const limitQuery = paginationQuery.limit(limit);
-
-  // Field limiting
-  let fields = '-__v';
-
-  // fields: 'name,email' == what we get
-  // fields: 'name email' == what we need to convert
-
-  if (query.fields) {
-    fields = (query.fields as string).split(',').join(' ');
-  }
-
-  const fieldQuery = await limitQuery.select(fields);
-
-  return fieldQuery;
+  const result = await studentQuery.modelQuery;
+  return result;
 };
 
 const getSingleStudentFromDB = async (id: string) => {
