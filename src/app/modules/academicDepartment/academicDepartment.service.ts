@@ -30,11 +30,9 @@ const updateAcademicDepartmentIntoDB = async (
   id: string,
   payload: Partial<TAcademicDepartment>,
 ) => {
-  const result = await AcademicDepartmentModel.findOneAndUpdate(
-    { _id: id },
-    payload,
-    { new: true },
-  );
+  const result = await AcademicDepartmentModel.findByIdAndUpdate(id, payload, {
+    new: true,
+  });
   return result;
 };
 

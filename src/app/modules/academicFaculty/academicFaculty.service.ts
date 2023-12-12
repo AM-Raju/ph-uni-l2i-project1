@@ -12,10 +12,7 @@ const getAllAcademicFacultiesFromDB = async () => {
 };
 
 const getSingleAcademicFacultyFromDB = async (id: string) => {
-  console.log('raju id', id);
-
   const result = await AcademicFacultyModel.findById(id);
-  console.log('raju2', result);
 
   return result;
 };
@@ -24,11 +21,9 @@ const updateAcademicFacultyIntoDB = async (
   id: string,
   payLoad: Partial<TAcademicFaculty>,
 ) => {
-  const result = await AcademicFacultyModel.findOneAndUpdate(
-    { _id: id },
-    payLoad,
-    { new: true },
-  );
+  const result = await AcademicFacultyModel.findByIdAndUpdate(id, payLoad, {
+    new: true,
+  });
   return result;
 };
 
