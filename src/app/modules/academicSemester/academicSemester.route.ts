@@ -19,13 +19,13 @@ router.get('/', AcademicSemesterControllers.getAllAcademicSemesters);
 
 // route to get single academic semester
 router.get(
-  '/:semesterId',
+  '/:id',
   AcademicSemesterControllers.getSingleAcademicSemester,
 );
 
 // route to update academic semester
 router.patch(
-  '/:semesterId',
+  '/:id',
   validateRequest(
     AcademicSemesterValidations.zodUpdateAcademicSemesterValidationSchema,
   ),

@@ -16,10 +16,10 @@ router.post(
 
 router.get('/', AcademicFacultyControllers.getAllAcademicFaculties);
 
-router.get('/:facultyId', AcademicFacultyControllers.getSingleAcademicFaculty);
+router.get('/:id', AcademicFacultyControllers.getSingleAcademicFaculty);
 
 router.patch(
-  '/:facultyId',
+  '/:id',
   validateRequest(
     academicFacultyValidations.zodUpdateAcademicFacultyValidationSchema,
   ),
