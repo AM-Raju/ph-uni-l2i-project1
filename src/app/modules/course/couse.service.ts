@@ -29,12 +29,18 @@ const getSingleCourseFromDB = async (id: string) => {
   return result;
 };
 
-const updateCourseFromDB = async (
-  id: string,
-  payload: Record<string, unknown>,
-) => {
-  const { preRequisiteCourses, ...restCourseData } = payload;
-  // work is running
+const updateCourseFromDB = async (id: string, payload: Partial<TCourse>) => {
+  const { preRequisiteCourses, ...courseRemainingData } = payload;
+  // Step 1: Update basic course info
+
+  const updateBasicCourseInfo = await CourseModel.findByIdAndUpdate(
+    id,
+    courseRemainingData,
+    {
+      new: true,
+      runValidators: true,
+    },
+  );
 };
 
 const deleteCourseFromDB = async (id: string) => {
