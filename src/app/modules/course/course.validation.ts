@@ -36,7 +36,7 @@ const zodUpdateCourseValidationSchema = z.object({
   isDeleted: z.boolean().optional(),
 });
 
-const zodCourseFacultyValidationSchema = z.object({
+const zodFacultiesWithCourseValidationSchema = z.object({
   body: z.object({
     faculties: z.array(z.string()),
   }),
@@ -45,5 +45,5 @@ const zodCourseFacultyValidationSchema = z.object({
 export const CourseValidations = {
   zodCreateCourseValidationSchema,
   zodUpdateCourseValidationSchema,
-  zodCourseFacultyValidationSchema,
+  zodFacultiesWithCourseValidationSchema,
 };

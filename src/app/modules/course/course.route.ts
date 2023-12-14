@@ -16,8 +16,14 @@ router.delete('/:id', CourseControllers.deleteCourse);
 
 router.put(
   '/:courseId/assign-faculties',
-  validateRequest(CourseValidations.zodCourseFacultyValidationSchema),
+  validateRequest(CourseValidations.zodFacultiesWithCourseValidationSchema),
   CourseControllers.assignFacultiesWithCourse,
+);
+
+router.delete(
+  '/:courseId/delete-faculties',
+  validateRequest(CourseValidations.zodFacultiesWithCourseValidationSchema),
+  CourseControllers.removeFacultiesWithCourse,
 );
 
 router.patch(
