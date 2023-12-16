@@ -9,6 +9,8 @@ import { CourseModel } from '../course/course.model';
 import { Faculty } from '../faculty/faculty.model';
 
 const createOfferedCourseIntoDB = async (payload: TOfferedCourse) => {
+  console.log(payload);
+
   const {
     semesterRegistration,
     academicFaculty,
