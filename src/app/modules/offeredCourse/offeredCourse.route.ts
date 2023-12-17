@@ -12,15 +12,19 @@ router.post(
   ),
   OfferedCourseControllers.createOfferedCourse,
 );
+
+router.patch(
+  '/:id',
+  validateRequest(
+    OfferedCourseValidations.zodUpdateOfferedCourseValidationSchema,
+  ),
+  OfferedCourseControllers.updateOfferedCourse,
+);
+
 /* router.get('/', CourseControllers.getAllCourses);
 router.get('/:id', CourseControllers.getSingleCourse);
 router.delete('/:id', CourseControllers.deleteCourse);
 
-router.put(
-  '/:courseId/assign-faculties',
-  validateRequest(CourseValidations.zodFacultiesWithCourseValidationSchema),
-  CourseControllers.assignFacultiesWithCourse,
-);
 
 router.delete(
   '/:courseId/delete-faculties',
