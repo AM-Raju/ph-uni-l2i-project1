@@ -9,8 +9,6 @@ import { CourseModel } from '../course/course.model';
 import { Faculty } from '../faculty/faculty.model';
 
 const createOfferedCourseIntoDB = async (payload: TOfferedCourse) => {
-  console.log(payload);
-
   const {
     semesterRegistration,
     academicFaculty,
@@ -94,6 +92,29 @@ const createOfferedCourseIntoDB = async (payload: TOfferedCourse) => {
       `Offered course with same section is already exist!`,
     );
   }
+
+  // get the schedule of the faculties
+  const assignedSchedules = await OfferedCourseModel.find({
+    semesterRegistration,
+    faculty,
+    days: { $in: days },
+  }).select('days startTime endTime');
+
+  const newSchedule = { days, startTime, endTime };
+
+  assignedSchedules.forEach((schedule) => {
+    const existingStartTime = new Date(`1970-01-01T${schedule.startTime}`);
+    const existingEndTime = new Date(`1970-01-01T${schedule.endTime}`);
+    const newStartTime = new Date(`1970-01-01T${newSchedule.startTime}`);
+    const newEndTime = new Date(`1970-01-01T${newSchedule.endTime}`);
+
+    if (newStartTime < existingEndTime && newEndTime > existingStartTime) {
+      throw new AppError(
+        httpStatus.CONFLICT,
+        `This faculty isn't available at that time. Choose other time or day`,
+      );
+    }
+  });
 
   const result = await OfferedCourseModel.create({
     ...payload,
