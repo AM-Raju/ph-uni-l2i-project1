@@ -5,6 +5,10 @@ import { OfferedCourseControllers } from './offeredCourse.controller';
 
 const router = express.Router();
 
+router.get('/', OfferedCourseControllers.getAllOfferedCourses);
+
+router.get('/:id', OfferedCourseControllers.getSingleOfferedCourse);
+
 router.post(
   '/create-offered-course',
   validateRequest(
@@ -21,21 +25,6 @@ router.patch(
   OfferedCourseControllers.updateOfferedCourse,
 );
 
-/* router.get('/', CourseControllers.getAllCourses);
-router.get('/:id', CourseControllers.getSingleCourse);
-router.delete('/:id', CourseControllers.deleteCourse);
-
-
-router.delete(
-  '/:courseId/delete-faculties',
-  validateRequest(CourseValidations.zodFacultiesWithCourseValidationSchema),
-  CourseControllers.removeFacultiesWithCourse,
-);
-
-router.patch(
-  '/:id',
-  validateRequest(CourseValidations.zodUpdateCourseValidationSchema),
-  CourseControllers.updateCourse,
-); */
+router.delete('/:id', OfferedCourseControllers.deleteOfferedCourse);
 
 export const OfferedCourseRoutes = router;
