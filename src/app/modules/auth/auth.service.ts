@@ -2,6 +2,8 @@ import httpStatus from 'http-status';
 import AppError from '../../error/AppError';
 import { User } from '../user/user.model';
 import { TLoginUser } from './auth.interface';
+import jwt from 'jsonwebtoken';
+import config from '../../config';
 
 const loginUser = async (payload: TLoginUser) => {
   // Checking if the user is exist
@@ -16,7 +18,7 @@ const loginUser = async (payload: TLoginUser) => {
   // Checking if the user is already deleted
   const isDeleted = userData?.isDeleted;
 
-  if (!isDeleted) {
+  if (isDeleted) {
     throw new AppError(httpStatus.FORBIDDEN, 'This user is Deleted');
   }
 
@@ -31,8 +33,27 @@ const loginUser = async (payload: TLoginUser) => {
   if (!(await User.isPasswordMatched(payload?.password, userData?.password))) {
     throw new AppError(httpStatus.FORBIDDEN, "Password didn't match");
   }
+
+  // Create token and sent to the client
+
+  const jwtPayload = {
+    userId: userData?.id,
+    role: userData?.role,
+  };
+
+  const accessToken = jwt.sign(
+    jwtPayload,
+    config.jwt_access_secret_key as string,
+    {
+      expiresIn: '10d',
+    },
+  );
+
   // Access granted: Send AccessToken, RefreshToken
-  return {};
+  return {
+    accessToken,
+    needsPasswordChange: userData?.needsPasswordChange,
+  };
 };
 
 export const AuthServices = {
