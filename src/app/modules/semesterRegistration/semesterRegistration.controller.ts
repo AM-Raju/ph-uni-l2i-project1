@@ -18,6 +18,8 @@ const createSemesterRegistration = catchAsync(async (req, res) => {
 });
 
 const getAllSemesterRegistration = catchAsync(async (req, res) => {
+  // console.log('semester reg', req.user);
+
   const result =
     await SemesterRegistrationServices.getAllSemesterRegistrationFromDB(
       req.query,
