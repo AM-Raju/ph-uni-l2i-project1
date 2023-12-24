@@ -2,9 +2,10 @@ import httpStatus from 'http-status';
 import AppError from '../../error/AppError';
 import { User } from '../user/user.model';
 import { TLoginUser } from './auth.interface';
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import { JwtPayload } from 'jsonwebtoken';
 import config from '../../config';
 import bcrypt from 'bcrypt';
+import { createToken } from './auth.utils';
 
 const loginUser = async (payload: TLoginUser) => {
   // Checking if the user is exist
@@ -41,17 +42,26 @@ const loginUser = async (payload: TLoginUser) => {
     role: userData?.role,
   };
 
-  const accessToken = jwt.sign(
+  // creation of access token
+  const accessToken = createToken(
     jwtPayload,
     config.jwt_access_secret_key as string,
-    {
-      expiresIn: '10d',
-    },
+    config.jwt_access_expires_in as string,
   );
+
+  // creation of refresh token
+  const refreshToken = createToken(
+    jwtPayload,
+    config.jwt_refresh_secret_key as string,
+    config.jwt_refresh_expires_in as string,
+  );
+
+  // sending refreshToken to the cookie
 
   // Access granted: Send AccessToken, RefreshToken
   return {
     accessToken,
+    refreshToken,
     needsPasswordChange: userData?.needsPasswordChange,
   };
 };
