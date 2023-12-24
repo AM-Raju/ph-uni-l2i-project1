@@ -4,6 +4,7 @@ import catchAsync from '../utils/catchAsync';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import config from '../config';
 import { TUserRole } from '../modules/user/user.interface';
+import { User } from '../modules/user/user.model';
 
 // auth HOC as middleware
 const auth = (...requiredRoles: TUserRole[]) => {
@@ -17,27 +18,44 @@ const auth = (...requiredRoles: TUserRole[]) => {
     }
 
     // Check if the token valid
-    jwt.verify(
+    const decoded = jwt.verify(
       token,
       config.jwt_access_secret_key as string,
-      function (err, decoded) {
-        // err
-        if (err) {
-          throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized');
-        }
+    ) as JwtPayload;
 
-        const role = (decoded as JwtPayload)?.role;
+    const { userId, role, iat } = decoded;
 
-        if (requiredRoles && !requiredRoles.includes(role)) {
-          throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized');
-        }
+    // Checking if the user is exist
+    // I just used it here to get the user data
+    const userData = await User.isUserExistsByCustomId(userId);
 
-        // decoded undefined
-        // console.log(decoded);
-        req.user = decoded as JwtPayload;
-        next();
-      },
-    );
+    if (!userData) {
+      throw new AppError(httpStatus.NOT_FOUND, "This user isn't found");
+    }
+
+    // Checking if the user is already deleted
+    const isDeleted = userData?.isDeleted;
+
+    if (isDeleted) {
+      throw new AppError(httpStatus.FORBIDDEN, 'This user is Deleted');
+    }
+
+    // Checking if the user is blocked
+    const userStatus = userData?.status;
+
+    if (userStatus === 'blocked') {
+      throw new AppError(httpStatus.FORBIDDEN, 'This user is Blocked');
+    }
+
+    if (requiredRoles && !requiredRoles.includes(role)) {
+      throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized');
+    }
+
+    // decoded undefined
+    // console.log(decoded);
+    req.user = decoded as JwtPayload;
+
+    next();
   });
 };
 

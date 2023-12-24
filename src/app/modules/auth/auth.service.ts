@@ -8,7 +8,6 @@ import bcrypt from 'bcrypt';
 
 const loginUser = async (payload: TLoginUser) => {
   // Checking if the user is exist
-
   // I just used it here to get the user data
   const userData = await User.isUserExistsByCustomId(payload?.id);
 
