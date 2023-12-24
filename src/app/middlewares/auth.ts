@@ -47,6 +47,18 @@ const auth = (...requiredRoles: TUserRole[]) => {
       throw new AppError(httpStatus.FORBIDDEN, 'This user is Blocked');
     }
 
+    // Checking JWT token is created after after password changed or not
+    // Note: passwordChangedTime > jwtToken creation time ==> true
+    if (
+      userData?.passwordChangedAt &&
+      User.isJWTIssuedBeforePasswordChanged(
+        userData.passwordChangedAt,
+        iat as number,
+      )
+    ) {
+      throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized');
+    }
+
     if (requiredRoles && !requiredRoles.includes(role)) {
       throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized');
     }
