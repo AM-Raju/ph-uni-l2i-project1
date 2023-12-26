@@ -20,8 +20,15 @@ const zodRefreshTokenValidationSchema = z.object({
   }),
 });
 
+const zodForgetPasswordValidationSchema = z.object({
+  body: z.object({
+    id: z.string({ required_error: 'User id is required' }),
+  }),
+});
+
 export const AuthValidations = {
   zodLoginValidationSchema,
   zodChangePasswordValidationSchema,
   zodRefreshTokenValidationSchema,
+  zodForgetPasswordValidationSchema,
 };
