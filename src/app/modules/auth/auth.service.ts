@@ -6,6 +6,7 @@ import { JwtPayload } from 'jsonwebtoken';
 import config from '../../config';
 import bcrypt from 'bcrypt';
 import { createToken } from './auth.utils';
+import jwt from 'jsonwebtoken';
 
 const loginUser = async (payload: TLoginUser) => {
   // Checking if the user is exist
@@ -119,7 +120,65 @@ const changePasswordIntoDB = async (
   return null;
 };
 
+const refreshToken = async (token: string) => {
+  // Check if the token valid
+  const decoded = jwt.verify(
+    token,
+    config.jwt_refresh_secret_key as string,
+  ) as JwtPayload;
+
+  const { userId, iat } = decoded;
+
+  // Checking if the user is exist
+  // I just used it here to get the user data
+  const userData = await User.isUserExistsByCustomId(userId);
+
+  if (!userData) {
+    throw new AppError(httpStatus.NOT_FOUND, "This user isn't found");
+  }
+
+  // Checking if the user is already deleted
+  const isDeleted = userData?.isDeleted;
+
+  if (isDeleted) {
+    throw new AppError(httpStatus.FORBIDDEN, 'This user is Deleted');
+  }
+
+  // Checking if the user is blocked
+  const userStatus = userData?.status;
+
+  if (userStatus === 'blocked') {
+    throw new AppError(httpStatus.FORBIDDEN, 'This user is Blocked');
+  }
+
+  // Checking JWT token is created after after password changed or not
+  // Note: passwordChangedTime > jwtToken creation time ==> true
+  if (
+    userData?.passwordChangedAt &&
+    User.isJWTIssuedBeforePasswordChanged(
+      userData.passwordChangedAt,
+      iat as number,
+    )
+  ) {
+    throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized');
+  }
+  const jwtPayload = {
+    userId: userData?.id,
+    role: userData?.role,
+  };
+
+  // creation of access token
+  const accessToken = createToken(
+    jwtPayload,
+    config.jwt_access_secret_key as string,
+    config.jwt_access_expires_in as string,
+  );
+
+  return { accessToken };
+};
+
 export const AuthServices = {
   loginUser,
   changePasswordIntoDB,
+  refreshToken,
 };

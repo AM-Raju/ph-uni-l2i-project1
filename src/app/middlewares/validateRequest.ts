@@ -4,7 +4,10 @@ import catchAsync from '../utils/catchAsync';
 // validateRequest HOC as middleware
 const validateRequest = (schema: AnyZodObject) => {
   return catchAsync(async (req, res, next) => {
-    await schema.parseAsync({ body: req.body });
+    await schema.parseAsync({
+      body: req.body,
+      cookies: req.cookies,
+    });
 
     next();
   });
