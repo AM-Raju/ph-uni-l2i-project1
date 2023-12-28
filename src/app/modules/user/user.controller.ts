@@ -24,7 +24,7 @@ const createFaculty = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Faculty is created succesfully',
+    message: 'Faculty is created successfully',
     data: result,
   });
 });
@@ -37,7 +37,19 @@ const createAdmin = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Admin is created succesfully',
+    message: 'Admin is created successfully',
+    data: result,
+  });
+});
+
+const getMe = catchAsync(async (req, res) => {
+  const token = req.headers.authorization;
+  const result = await UserServices.getMe(token as string);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Your info retrieved successfully',
     data: result,
   });
 });
@@ -46,4 +58,5 @@ export const UserControllers = {
   createStudent,
   createFaculty,
   createAdmin,
+  getMe,
 };

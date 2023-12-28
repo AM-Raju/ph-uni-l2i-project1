@@ -1,10 +1,11 @@
 import httpStatus from 'http-status';
 import AppError from '../error/AppError';
 import catchAsync from '../utils/catchAsync';
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import { JwtPayload } from 'jsonwebtoken';
 import config from '../config';
 import { TUserRole } from '../modules/user/user.interface';
 import { User } from '../modules/user/user.model';
+import { verifyToken } from '../modules/auth/auth.utils';
 
 // auth HOC as middleware
 const auth = (...requiredRoles: TUserRole[]) => {
@@ -18,10 +19,7 @@ const auth = (...requiredRoles: TUserRole[]) => {
     }
 
     // Check if the token valid
-    const decoded = jwt.verify(
-      token,
-      config.jwt_access_secret_key as string,
-    ) as JwtPayload;
+    const decoded = verifyToken(token, config.jwt_access_secret_key as string);
 
     const { userId, role, iat } = decoded;
 
