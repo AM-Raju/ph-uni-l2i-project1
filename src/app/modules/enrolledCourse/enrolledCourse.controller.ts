@@ -16,7 +16,7 @@ const createEnrolledCourse = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Faculty is retrieved successfully',
+    message: 'Course enrolled Successfully',
     data: result,
   });
 });
