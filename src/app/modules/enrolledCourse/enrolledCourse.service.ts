@@ -51,19 +51,46 @@ Business logic to create offeredCourse
     isOfferedCourseExists.semesterRegistration,
   ).select('maxCredit');
 
-  // Total enrolled credits + new enrolled credits > maxCredits
-
   const enrolledCourses = await EnrolledCourse.aggregate([
-    // Stage one
+    // Stage one : Find data
     {
       $match: {
         semesterRegistration: isOfferedCourseExists.semesterRegistration,
         student: student._id,
       },
     },
-  ]);
 
-  console.log('Enrolled courses', enrolledCourses);
+    // Stage Two: lookup
+    {
+      $lookup: {
+        from: 'courses',
+        localField: 'course',
+        foreignField: '_id',
+        as: 'enrolledCourseData',
+      },
+    },
+    // Stage Three
+    {
+      $unwind: '$enrolledCourseData',
+    },
+    // Stage Four
+    {
+      $group: {
+        _id: null,
+        totalEnrolledCredits: { $sum: '$enrolledCourseData.credits' },
+      },
+    },
+    // Stage Five
+    {
+      $project: {
+        _id: 0,
+        totalEnrolledCredits: 1,
+      },
+    },
+  ]);
+  // Total enrolled credits + new enrolled credits > maxCredits
+  const totalCredits =
+    enrolledCourses.length > 0 ? enrolledCourses?.totalEnrolledCredits : 0;
 
   /*   const session = await mongoose.startSession();
 
