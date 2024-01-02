@@ -108,7 +108,7 @@ Business logic to create offeredCourse
     );
   }
 
-  /*   const session = await mongoose.startSession();
+  const session = await mongoose.startSession();
 
   try {
     session.startTransaction();
@@ -155,9 +155,40 @@ Business logic to create offeredCourse
     await session.abortTransaction();
     await session.endSession();
     throw new Error(err);
-  } */
+  }
+};
+
+const updateEnrolledCourseMarksIntoDB = async (
+  facultyId: string,
+  payload: Partial<TEnrolledCourse>,
+) => {
+  const { semesterRegistration, offeredCourse, student, courseMarks } = payload;
+
+  const isSemesterRegistrationExists =
+    await SemesterRegistrationModel.findById(semesterRegistration);
+
+  if (!isSemesterRegistrationExists) {
+    throw new AppError(
+      httpStatus.NOT_FOUND,
+      'Semester registration not found !',
+    );
+  }
+
+  const isOfferedCourseExists =
+    await OfferedCourseModel.findById(offeredCourse);
+
+  if (!isOfferedCourseExists) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Offered course not found !');
+  }
+
+  const isStudentExists = await Student.findById(offeredCourse);
+
+  if (!isStudentExists) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Student not found !');
+  }
 };
 
 export const EnrolledCourseServices = {
   createEnrolledCourseIntoDB,
+  updateEnrolledCourseMarksIntoDB,
 };
